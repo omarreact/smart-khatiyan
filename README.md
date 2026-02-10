@@ -1,38 +1,21 @@
-# 🇧🇩 Smart Khatiyan Calculator (স্মার্ট খতিয়ান ক্যালকুলেটর)
+MIT License
 
-A powerful, web-based tool designed for the intricate land measurement system of Bangladesh. This application calculates land shares based on the traditional **Ana-Gonda-Kora-Kranti-Til** system and generates professional reports.
+Copyright (c) 2026
 
-🔗 **Live Demo:** [Click Here to View App](https://YOUR-USERNAME.github.io/REPO-NAME/) *(আপলোড করার পর এখানে লিংক দেবেন)*
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-## ✨ Features (সুবিধাসমূহ)
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-- **🗳️ Detailed Calculator:** Calculate land distribution from plot (Dag) numbers and ownership shares.
-- **⚡ Quick Calculator:** Instantly find land area just by inputting total land and share (Ana-Gonda...).
-- **📱 Responsive UI:** Built with **Tailwind CSS**, fully optimized for Mobile and Desktop.
-- **🇧🇩 Bangla Support:** Auto-converts English numbers to Bangla digits.
-- **📄 Smart Export:** Download results as high-quality **PDF** (with Bangla font support) or **JPG** image.
-- **💾 Auto-Save:** Data persists in the browser (Local Storage) so you never lose your work on refresh.
-- **🧮 Validation:** Automatic 16 Ana validation check.
-
-## 🛠️ Tech Stack
-
-- **HTML5**
-- **Tailwind CSS** (via CDN for styling)
-- **JavaScript** (ES6+)
-- **Libraries:**
-  - `jspdf` & `html2canvas` (For PDF/Image generation)
-  - `FontAwesome` (For icons)
-
-## 🚀 How to Use
-
-1. Clone the repository or download the ZIP.
-2. Open `index.html` in any modern web browser.
-3. Start calculating! No server or installation required.
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to open an issue or submit a pull request.
-
-## 📝 License
-
-This project is open-source and available under the [MIT License](LICENSE).
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

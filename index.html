@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>স্মার্ট খতিয়ান ক্যালকুলেটর (Bangla Input)</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ["Hind Siliguri", "sans-serif"] },
+            colors: { primary: "#059669", secondary: "#10b981" },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #059669;
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen pb-24"
+  >
+    <div class="max-w-5xl mx-auto px-4 py-6">
+      <div class="text-center mb-6">
+        <div
+          class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 mb-3 shadow-sm"
+        >
+          <i class="fas fa-calculator text-2xl"></i>
+        </div>
+        <h1 class="text-3xl font-bold text-slate-800">
+          স্মার্ট খতিয়ান ক্যালকুলেটর
+        </h1>
+        <p class="text-slate-500 text-sm">নির্ভুল আনা-গন্ডা হিসাব ও বন্টন</p>
+      </div>
+
+      <div class="flex justify-center mb-8">
+        <div
+          class="bg-white p-1 rounded-full shadow border border-slate-200 inline-flex"
+        >
+          <button
+            onclick="switchTab('detailed')"
+            id="btn-detailed"
+            class="px-6 py-2 rounded-full text-sm font-semibold bg-primary text-white shadow-sm transition-all"
+          >
+            <i class="fas fa-list-alt mr-2"></i>বিস্তারিত
+          </button>
+          <button
+            onclick="switchTab('quick')"
+            id="btn-quick"
+            class="px-6 py-2 rounded-full text-sm font-semibold text-slate-500 hover:text-primary transition-all"
+          >
+            <i class="fas fa-bolt mr-2"></i>কুইক হিসাব
+          </button>
+        </div>
+      </div>
+
+      <div id="content-area" class="fade-in">
+        <div id="tab-detailed" class="block">
+          <div
+            id="validationStatus"
+            class="hidden mb-6 p-4 rounded-lg text-center font-bold shadow-sm"
+          ></div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div
+              class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden"
+            >
+              <div
+                class="bg-slate-800 text-white px-5 py-3 flex justify-between items-center"
+              >
+                <span class="font-semibold text-sm"
+                  ><i class="fas fa-map-marker-alt mr-2"></i>১. জমির দাগ ও
+                  পরিমাণ</span
+                >
+                <button
+                  type="button"
+                  onclick="addPlotRow()"
+                  class="bg-slate-600 hover:bg-slate-500 text-xs px-3 py-1.5 rounded transition"
+                >
+                  + দাগ যোগ
+                </button>
+              </div>
+              <div class="table-container">
+                <table class="w-full text-left" id="plotTable">
+                  <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+                    <tr>
+                      <th class="px-3 py-2">দাগ নং</th>
+                      <th class="px-3 py-2">শ্রেণী</th>
+                      <th class="px-3 py-2">জমি (শতাংশ)</th>
+                      <th class="px-2 py-2 text-center">x</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100 text-sm"></tbody>
+                </table>
+              </div>
+              <div
+                id="plotEmptyState"
+                class="text-center py-6 text-slate-400 text-sm italic"
+              >
+                কোনো দাগ নেই
+              </div>
+            </div>
+
+            <div
+              class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden"
+            >
+              <div
+                class="bg-primary text-white px-5 py-3 flex justify-between items-center"
+              >
+                <span class="font-semibold text-sm"
+                  ><i class="fas fa-users mr-2"></i>২. মালিকানা ও অংশ</span
+                >
+                <button
+                  type="button"
+                  onclick="addOwnerRow()"
+                  class="bg-emerald-700 hover:bg-emerald-800 text-xs px-3 py-1.5 rounded transition"
+                >
+                  + মালিক যোগ
+                </button>
+              </div>
+              <div class="table-container">
+                <table class="w-full text-left" id="ownerTable">
+                  <thead
+                    class="bg-emerald-50 text-xs uppercase text-emerald-600"
+                  >
+                    <tr>
+                      <th class="px-3 py-2 min-w-[130px]">নাম</th>
+                      <th class="px-2 py-2 min-w-[110px]">পিতা/স্বামী</th>
+                      <th class="px-1 py-2 min-w-[80px]">আনা</th>
+                      <th class="px-1 py-2 min-w-[80px]">গন্ডা</th>
+                      <th class="px-1 py-2 min-w-[70px]">কড়া</th>
+                      <th class="px-1 py-2 min-w-[70px]">ক্রান্তি</th>
+                      <th class="px-1 py-2 min-w-[80px]">তিল</th>
+                      <th class="px-1 py-2 text-center">x</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100 text-sm"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-quick" class="hidden">
+          <div
+            class="max-w-xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden"
+          >
+            <div class="bg-blue-600 p-4 text-white text-center">
+              <h2 class="font-bold text-lg">দ্রুত জমির হিসাব</h2>
+            </div>
+            <div class="p-6">
+              <div class="mb-5">
+                <label class="block text-sm font-medium text-slate-700 mb-1"
+                  >মোট জমির পরিমাণ (শতাংশ)</label
+                >
+                <input
+                  type="text"
+                  id="quickTotalLand"
+                  oninput="makeBangla(this)"
+                  class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-blue-500 transition font-semibold"
+                  placeholder="৫০"
+                />
+              </div>
+              <div
+                class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-5"
+              >
+                <h3 class="text-xs font-bold text-slate-500 uppercase mb-3">
+                  আপনার অংশ সিলেক্ট করুন
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <div>
+                    <label class="text-[10px] text-slate-500 block">আনা</label
+                    ><select
+                      id="quickAna"
+                      class="w-full p-1.5 rounded border text-sm"
+                    ></select>
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-slate-500 block">গন্ডা</label
+                    ><select
+                      id="quickGonda"
+                      class="w-full p-1.5 rounded border text-sm"
+                    ></select>
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-slate-500 block">কড়া</label
+                    ><select
+                      id="quickKora"
+                      class="w-full p-1.5 rounded border text-sm"
+                    ></select>
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-slate-500 block"
+                      >ক্রান্তি</label
+                    ><select
+                      id="quickKranti"
+                      class="w-full p-1.5 rounded border text-sm"
+                    ></select>
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-slate-500 block">তিল</label
+                    ><select
+                      id="quickTil"
+                      class="w-full p-1.5 rounded border text-sm"
+                    ></select>
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onclick="calculateQuick()"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition"
+              >
+                ফলাফল দেখুন
+              </button>
+
+              <div
+                id="quickResult"
+                class="hidden mt-6 bg-emerald-50 border border-emerald-100 p-4 rounded-xl text-center"
+              >
+                <p class="text-emerald-600 text-xs font-bold uppercase">
+                  আপনার প্রাপ্ত জমি
+                </p>
+                <h2
+                  class="text-3xl font-bold text-emerald-700 my-2"
+                  id="quickLandAmount"
+                >
+                  0.00
+                </h2>
+                <div class="flex justify-center gap-3 text-xs text-slate-600">
+                  <span class="bg-white px-2 py-1 rounded border"
+                    ><span id="quickSqFt">0</span> বর্গফুট</span
+                  >
+                  <span class="bg-white px-2 py-1 rounded border"
+                    ><span id="quickKatha">0</span> কাঠা</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resultSection" class="hidden mt-10 max-w-4xl mx-auto fade-in">
+        <div
+          class="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden"
+        >
+          <div class="bg-slate-900 text-white text-center py-3">
+            <h4 class="font-bold">বন্টন নামা</h4>
+          </div>
+          <div id="exportContainer" class="p-8 bg-white">
+            <div class="text-center mb-6 border-b border-slate-100 pb-4">
+              <h2 class="text-xl font-bold text-primary uppercase">
+                জমির পরিমাপ ও বন্টন বিবরণী
+              </h2>
+              <p class="text-slate-400 text-xs mt-1">
+                তারিখ: <span id="currentDate"></span>
+              </p>
+            </div>
+            <div id="dynamicResults" class="space-y-4"></div>
+            <div class="mt-8 text-center text-slate-300 text-[10px]">
+              ডিজিটাল ক্যালকুলেটর দ্বারা প্রস্তুতকৃত
+            </div>
+          </div>
+          <div
+            class="bg-slate-50 px-6 py-4 flex flex-col md:flex-row justify-center gap-3 border-t border-slate-100"
+          >
+            <button
+              type="button"
+              onclick="downloadSmartPDF()"
+              class="btn-download bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-lg font-bold shadow-md transition flex items-center justify-center text-sm"
+            >
+              <i class="fas fa-file-pdf mr-2"></i> PDF ডাউনলোড
+            </button>
+            <button
+              type="button"
+              onclick="downloadImage()"
+              class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg font-bold shadow-md transition flex items-center justify-center text-sm"
+            >
+              <i class="fas fa-image mr-2"></i> ইমেজ সেভ
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="fixed bottom-6 left-0 right-0 z-50 flex justify-center pointer-events-none"
+        id="floatingBar"
+      >
+        <div
+          class="bg-white/90 backdrop-blur p-1.5 rounded-full shadow-2xl border border-slate-200 pointer-events-auto flex gap-2"
+        >
+          <button
+            type="button"
+            onclick="calculateDetailed()"
+            class="bg-primary hover:bg-emerald-700 text-white px-6 py-3 rounded-full font-bold shadow-lg text-sm transition transform hover:-translate-y-1"
+          >
+            <i class="fas fa-calculator mr-2"></i>হিসাব করুন
+          </button>
+          <button
+            type="button"
+            onclick="clearAll()"
+            class="bg-white hover:bg-red-50 text-red-500 border border-red-100 px-4 py-3 rounded-full font-semibold shadow-sm transition hover:scale-105"
+            title="রিসেট"
+          >
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- Constants ---
+      const FULL_UNIT_TIL = 76800;
+      const banglaNumbers = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+      const engNumbers = {
+        "০": "0",
+        "১": "1",
+        "২": "2",
+        "৩": "3",
+        "৪": "4",
+        "৫": "5",
+        "৬": "6",
+        "৭": "7",
+        "৮": "8",
+        "৯": "9",
+      };
+
+      // --- Tab Logic ---
+      function switchTab(tab) {
+        const detContent = document.getElementById("tab-detailed");
+        const qContent = document.getElementById("tab-quick");
+        const btnDet = document.getElementById("btn-detailed");
+        const btnQ = document.getElementById("btn-quick");
+        const floatBar = document.getElementById("floatingBar");
+
+        if (tab === "detailed") {
+          detContent.classList.remove("hidden");
+          qContent.classList.add("hidden");
+          btnDet.className =
+            "px-6 py-2 rounded-full text-sm font-semibold bg-primary text-white shadow-sm transition-all";
+          btnQ.className =
+            "px-6 py-2 rounded-full text-sm font-semibold text-slate-500 hover:text-primary transition-all";
+          floatBar.classList.remove("hidden");
+        } else {
+          detContent.classList.add("hidden");
+          qContent.classList.remove("hidden");
+          btnQ.className =
+            "px-6 py-2 rounded-full text-sm font-semibold bg-blue-600 text-white shadow-sm transition-all";
+          btnDet.className =
+            "px-6 py-2 rounded-full text-sm font-semibold text-slate-500 hover:text-blue-600 transition-all";
+          floatBar.classList.add("hidden");
+        }
+      }
+
+      // --- NUMBER HELPERS (NEW) ---
+      function toBn(n) {
+        if (n === undefined || n === null) return "০";
+        return n
+          .toString()
+          .split("")
+          .map((c) => (isNaN(parseInt(c)) ? c : banglaNumbers[parseInt(c)]))
+          .join("");
+      }
+
+      // Converts Bangla String to English Float for Calculation
+      function toEn(str) {
+        if (!str) return 0;
+        let engStr = str
+          .toString()
+          .split("")
+          .map((c) => engNumbers[c] || c)
+          .join("");
+        return parseFloat(engStr) || 0;
+      }
+
+      // Input Event Listener: Forces Bangla Digits
+      function makeBangla(el) {
+        const map = {
+          0: "০",
+          1: "১",
+          2: "২",
+          3: "৩",
+          4: "৪",
+          5: "৫",
+          6: "৬",
+          7: "৭",
+          8: "৮",
+          9: "৯",
+        };
+        el.value = el.value
+          .toString()
+          .split("")
+          .map((c) => map[c] || c)
+          .join("");
+      }
+
+      function createOpts(opts, s = 0) {
+        return opts
+          .map(
+            (o) =>
+              `<option value="${o.v}" ${o.v == s ? "selected" : ""}>${o.t}</option>`,
+          )
+          .join("");
+      }
+
+      // --- Options ---
+      const anaOps = [
+        { v: 0, t: "আনা-০" },
+        { v: 1, t: "১ আনা (৲)" },
+        { v: 2, t: "২ আনা (৲৲)" },
+        { v: 3, t: "৩ আনা (৲৲৲)" },
+        { v: 4, t: "৪ আনা (l)" },
+        { v: 5, t: "৫ আনা (l৲)" },
+        { v: 6, t: "৬ আনা (l৲৲)" },
+        { v: 7, t: "৭ আনা (l৲৲৲)" },
+        { v: 8, t: "৮ আনা (ll)" },
+        { v: 9, t: "৯ আনা (ll৲)" },
+        { v: 10, t: "১০ আনা (ll৲৲)" },
+        { v: 11, t: "১১ আনা (ll৲৲৲)" },
+        { v: 12, t: "১২ আনা (lll)" },
+        { v: 13, t: "১৩ আনা (lll৲)" },
+        { v: 14, t: "১৪ আনা (lll৲৲)" },
+        { v: 15, t: "১৫ আনা (lll৲৲৲)" },
+        { v: 16, t: "১৬ আনা (১)" },
+      ];
+      const gonOps = [
+        { v: 0, t: "গন্ডা-০" },
+        ...Array.from({ length: 19 }, (_, i) => ({
+          v: i + 1,
+          t: `${toBn(i + 1)} গন্ডা`,
+        })),
+      ];
+      const korOps = [
+        { v: 0, t: "কড়া-০" },
+        { v: 1, t: "১ কড়া (।)" },
+        { v: 2, t: "২ কড়া (।।)" },
+        { v: 3, t: "৩ কড়া (দ)" },
+      ];
+      const kraOps = [
+        { v: 0, t: "ক্রান্তি-০" },
+        { v: 1, t: "১ ক্রান্তি (/)" },
+        { v: 2, t: "২ ক্রান্তি (//)" },
+      ];
+      const tilOps = [
+        { v: 0, t: "তিল-০" },
+        ...Array.from({ length: 19 }, (_, i) => ({
+          v: i + 1,
+          t: `${toBn(i + 1)} তিল`,
+        })),
+      ];
+
+      // --- Init ---
+      window.onload = function () {
+        if (localStorage.getItem("khatiyanData")) loadData();
+        else {
+          addPlotRow();
+          addOwnerRow();
+        }
+
+        ["Ana", "Gonda", "Kora", "Kranti", "Til"].forEach((t, i) => {
+          document.getElementById(`quick${t}`).innerHTML = createOpts(
+            [anaOps, gonOps, korOps, kraOps, tilOps][i],
+          );
+        });
+        checkEmptyPlot();
+      };
+
+      // --- DOM ---
+      function checkEmptyPlot() {
+        const len = document.querySelectorAll("#plotTable tbody tr").length;
+        const st = document.getElementById("plotEmptyState");
+        if (len === 0) st.classList.remove("hidden");
+        else st.classList.add("hidden");
+      }
+
+      function addPlotRow(d = "", t = "", a = "") {
+        const row = document.createElement("tr");
+        row.className = "hover:bg-slate-50 transition border-b border-slate-50";
+        // Added oninput="makeBangla(this)" to input fields
+        row.innerHTML = `<td class="p-2"><input type="text" oninput="makeBangla(this)" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-2 text-sm" value="${d}" placeholder="১০১"></td>
+            <td class="p-2"><input type="text" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-2 text-sm" value="${t}" placeholder="নাল"></td>
+            <td class="p-2"><input type="text" oninput="makeBangla(this)" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-2 text-sm" value="${a}" placeholder="০.০০"></td>
+            <td class="p-2 text-center"><button type="button" onclick="removeRow(this)" class="text-slate-300 hover:text-red-500"><i class="fas fa-times-circle"></i></button></td>`;
+        document.querySelector("#plotTable tbody").appendChild(row);
+        checkEmptyPlot();
+      }
+
+      function addOwnerRow(
+        n = "",
+        r = "",
+        a = 0,
+        g = 0,
+        k = 0,
+        kr = 0,
+        ti = 0,
+      ) {
+        const row = document.createElement("tr");
+        row.className =
+          "hover:bg-emerald-50/50 transition border-b border-slate-50";
+        row.innerHTML = `<td class="p-2"><input type="text" class="w-full bg-white border border-slate-200 rounded px-2 py-2 text-sm" value="${n}" placeholder="নাম"></td>
+            <td class="p-2"><input type="text" class="w-full bg-white border border-slate-200 rounded px-2 py-2 text-sm" value="${r}" placeholder="পিতা/স্বামী"></td>
+            <td class="p-1"><select class="w-full bg-white border border-slate-200 rounded px-1 py-2 text-xs" onchange="valTotal()">${createOpts(anaOps, a)}</select></td>
+            <td class="p-1"><select class="w-full bg-white border border-slate-200 rounded px-1 py-2 text-xs" onchange="valTotal()">${createOpts(gonOps, g)}</select></td>
+            <td class="p-1"><select class="w-full bg-white border border-slate-200 rounded px-1 py-2 text-xs" onchange="valTotal()">${createOpts(korOps, k)}</select></td>
+            <td class="p-1"><select class="w-full bg-white border border-slate-200 rounded px-1 py-2 text-xs" onchange="valTotal()">${createOpts(kraOps, kr)}</select></td>
+            <td class="p-1"><select class="w-full bg-white border border-slate-200 rounded px-1 py-2 text-xs" onchange="valTotal()">${createOpts(tilOps, ti)}</select></td>
+            <td class="p-1 text-center"><button type="button" onclick="removeRow(this)" class="text-slate-300 hover:text-red-500"><i class="fas fa-times-circle"></i></button></td>`;
+        document.querySelector("#ownerTable tbody").appendChild(row);
+        valTotal();
+      }
+
+      function removeRow(btn) {
+        btn.closest("tr").remove();
+        checkEmptyPlot();
+        valTotal();
+      }
+
+      function valTotal() {
+        const rows = document.querySelectorAll("#ownerTable tbody tr");
+        let t = 0;
+        rows.forEach((r) => {
+          const s = r.querySelectorAll("select");
+          t +=
+            parseInt(s[0].value) * 4800 +
+            parseInt(s[1].value) * 240 +
+            parseInt(s[2].value) * 60 +
+            parseInt(s[3].value) * 20 +
+            parseInt(s[4].value);
+        });
+        const st = document.getElementById("validationStatus");
+        st.classList.remove(
+          "hidden",
+          "bg-emerald-100",
+          "text-emerald-800",
+          "bg-red-100",
+          "text-red-800",
+          "bg-yellow-100",
+          "text-yellow-800",
+        );
+        if (t === FULL_UNIT_TIL) {
+          st.classList.add("bg-emerald-100", "text-emerald-800");
+          st.innerHTML =
+            '<i class="fas fa-check-circle mr-2"></i> ১৬ আনা মিলেছে!';
+        } else if (t > FULL_UNIT_TIL) {
+          st.classList.add("bg-red-100", "text-red-800");
+          st.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> ১৬ আনার বেশি! (+${toBn(t - FULL_UNIT_TIL)} তিল)`;
+        } else {
+          st.classList.add("bg-yellow-50", "text-yellow-800");
+          st.innerHTML = `<i class="fas fa-info-circle mr-2"></i> ১৬ আনা পূর্ণ হয়নি (বাকি ${toBn(FULL_UNIT_TIL - t)} তিল)`;
+        }
+      }
+
+      // --- Calc ---
+      function calculateDetailed() {
+        const pRows = document.querySelectorAll("#plotTable tbody tr");
+        const oRows = document.querySelectorAll("#ownerTable tbody tr");
+        const resDiv = document.getElementById("dynamicResults");
+        const resSec = document.getElementById("resultSection");
+        resDiv.innerHTML = "";
+        document.getElementById("currentDate").innerText =
+          new Date().toLocaleDateString("bn-BD");
+
+        let hasData = false;
+        oRows.forEach((r) => {
+          const inp = r.querySelectorAll("input"),
+            sel = r.querySelectorAll("select");
+          const ana = parseInt(sel[0].value) || 0,
+            gon = parseInt(sel[1].value) || 0,
+            kor = parseInt(sel[2].value) || 0,
+            kra = parseInt(sel[3].value) || 0,
+            til = parseInt(sel[4].value) || 0;
+          const share =
+            (ana * 4800 + gon * 240 + kor * 60 + kra * 20 + til) /
+            FULL_UNIT_TIL;
+
+          let shareTxt = [];
+          if (ana) shareTxt.push(`${toBn(ana)} আনা`);
+          if (gon) shareTxt.push(`${toBn(gon)} গন্ডা`);
+
+          if (share > 0) {
+            hasData = true;
+            let plotsHTML = "",
+              tot = 0;
+            pRows.forEach((pr) => {
+              const pi = pr.querySelectorAll("input");
+              // Convert Bangla Input to English Float
+              const area = toEn(pi[2].value);
+
+              if (area > 0) {
+                const got = area * share;
+                tot += got;
+                plotsHTML += `<tr class="border-b border-slate-50"><td class="py-2 text-slate-600">${pi[0].value}</td><td class="py-2 text-xs text-slate-500">${pi[1].value}</td><td class="py-2 text-slate-500">${toBn(area)}</td><td class="py-2 text-right font-bold text-emerald-600">${toBn(got.toFixed(4))}</td><td class="py-2 text-right text-xs text-slate-400">${toBn((got * 435.6).toFixed(1))}</td></tr>`;
+              }
+            });
+            if (plotsHTML) {
+              resDiv.innerHTML += `<div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition"><div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center"><div><h5 class="font-bold text-slate-800">${inp[0].value || "নামহীন"}</h5><p class="text-xs text-slate-500">${inp[1].value || "-"}</p></div><span class="bg-emerald-100 text-emerald-700 text-xs px-3 py-1 rounded-full font-semibold">${shareTxt.join(", ")}...</span></div><div class="p-6"><table class="w-full text-sm"><thead><tr class="text-xs text-slate-400 border-b"><th>দাগ</th><th>শ্রেণী</th><th>মোট</th><th class="text-right">প্রাপ্ত</th><th class="text-right">বর্গফুট</th></tr></thead><tbody>${plotsHTML}</tbody><tfoot class="bg-yellow-50/50"><tr><td colspan="3" class="py-3 text-right font-semibold">মোট:</td><td class="py-3 text-right font-bold text-lg text-emerald-700">${toBn(tot.toFixed(3))}</td><td class="py-3 text-right text-slate-500">${toBn((tot / 1.65).toFixed(2))} কাঠা</td></tr></tfoot></table></div></div>`;
+            }
+          }
+        });
+
+        if (hasData) {
+          resSec.classList.remove("hidden");
+          resSec.scrollIntoView({ behavior: "smooth" });
+          saveData();
+        } else alert("কমপক্ষে একজন মালিকের অংশ এবং জমির পরিমাণ দিন।");
+      }
+
+      function calculateQuick() {
+        // Convert Bangla Input to English Float
+        const tot = toEn(document.getElementById("quickTotalLand").value);
+
+        const ana = parseInt(document.getElementById("quickAna").value) || 0,
+          gon = parseInt(document.getElementById("quickGonda").value) || 0,
+          kor = parseInt(document.getElementById("quickKora").value) || 0,
+          kra = parseInt(document.getElementById("quickKranti").value) || 0,
+          til = parseInt(document.getElementById("quickTil").value) || 0;
+        const share =
+          (ana * 4800 + gon * 240 + kor * 60 + kra * 20 + til) / FULL_UNIT_TIL;
+
+        if (tot > 0 && share > 0) {
+          const got = tot * share;
+          document.getElementById("quickLandAmount").innerText = toBn(
+            got.toFixed(3),
+          );
+          document.getElementById("quickSqFt").innerText = toBn(
+            (got * 435.6).toFixed(1),
+          );
+          document.getElementById("quickKatha").innerText = toBn(
+            (got / 1.65).toFixed(2),
+          );
+
+          const resBox = document.getElementById("quickResult");
+          resBox.classList.remove("hidden");
+          resBox.classList.remove("animate-pulse");
+          void resBox.offsetWidth;
+          resBox.classList.add("animate-pulse");
+        } else alert("তথ্য সঠিক নয়।");
+      }
+
+      // --- Utils ---
+      function clearAll() {
+        if (confirm("সব ডাটা মুছে ফেলতে চান?")) {
+          localStorage.removeItem("khatiyanData");
+          location.reload();
+        }
+      }
+
+      function saveData() {
+        const d = {
+          p: Array.from(document.querySelectorAll("#plotTable tbody tr")).map(
+            (r) => ({
+              d: r.querySelector("input:nth-child(1)").value,
+              t: r.querySelector("input:nth-child(1)").value,
+              a: r.querySelectorAll("input")[2].value,
+            }),
+          ),
+          o: Array.from(document.querySelectorAll("#ownerTable tbody tr")).map(
+            (r) => {
+              const i = r.querySelectorAll("input"),
+                s = r.querySelectorAll("select");
+              return {
+                n: i[0].value,
+                r: i[1].value,
+                a: s[0].value,
+                g: s[1].value,
+                k: s[2].value,
+                kr: s[3].value,
+                t: s[4].value,
+              };
+            },
+          ),
+        };
+        localStorage.setItem("khatiyanData", JSON.stringify(d));
+      }
+
+      function loadData() {
+        const d = JSON.parse(localStorage.getItem("khatiyanData"));
+        if (!d) return;
+        document.querySelector("#plotTable tbody").innerHTML = "";
+        d.p.forEach((x) => addPlotRow(x.d, x.t, x.a));
+        document.querySelector("#ownerTable tbody").innerHTML = "";
+        d.o.forEach((x) => addOwnerRow(x.n, x.r, x.a, x.g, x.k, x.kr, x.t));
+        valTotal();
+      }
+
+      function downloadSmartPDF() {
+        const el = document.getElementById("exportContainer");
+        const btn = document.querySelector(".btn-download");
+        btn.innerHTML = "প্রসেসিং...";
+        html2canvas(el, { scale: 2 }).then((c) => {
+          const img = c.toDataURL("image/png"),
+            pdf = new jspdf.jsPDF("p", "mm", "a4");
+          const w = pdf.internal.pageSize.getWidth(),
+            h = (c.height * w) / c.width;
+          pdf.addImage(img, "PNG", 0, 0, w, h);
+          pdf.save("Khatiyan.pdf");
+          btn.innerHTML = '<i class="fas fa-file-pdf mr-2"></i> PDF ডাউনলোড';
+        });
+      }
+      function downloadImage() {
+        html2canvas(document.getElementById("exportContainer"), {
+          scale: 2,
+        }).then((c) => {
+          const a = document.createElement("a");
+          a.download = "Khatiyan.jpg";
+          a.href = c.toDataURL("image/jpeg");
+          a.click();
+        });
+      }
+    </script>
+  </body>
+</html>
