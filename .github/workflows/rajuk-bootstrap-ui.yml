@@ -1,0 +1,122 @@
+name: Apply RAJUK Bootstrap UI
+
+on:
+  push:
+    branches:
+      - feat/rajuk-bootstrap-ui
+    paths:
+      - rajuk_master_plan.html
+      - .github/workflows/rajuk-bootstrap-ui.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  theme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Apply Bootstrap 5 theme
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          path = Path("rajuk_master_plan.html")
+          html = path.read_text(encoding="utf-8")
+          marker = "<!-- LANDBD RAJUK BOOTSTRAP THEME -->"
+
+          if marker not in html:
+              theme = r'''<!-- LANDBD RAJUK BOOTSTRAP THEME -->
+          <link rel="preconnect" href="https://cdn.jsdelivr.net">
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+          <style id="landbd-bootstrap-theme">
+            :root {
+              --landbd-primary: #0b6b50;
+              --landbd-primary-dark: #084f3c;
+              --landbd-surface: rgba(255,255,255,.96);
+              --landbd-border: rgba(20, 55, 45, .14);
+              --landbd-shadow: 0 10px 30px rgba(15, 40, 32, .12);
+            }
+            html, body { height: 100%; }
+            body {
+              margin: 0;
+              background: #eef3f1;
+              font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            }
+            body::selection { background: rgba(11,107,80,.22); }
+
+            /* Bootstrap-friendly GIS surfaces without breaking Calcite/ArcGIS components. */
+            .esri-ui .esri-widget,
+            .esri-ui .esri-component {
+              border: 1px solid var(--landbd-border);
+              border-radius: .75rem;
+              box-shadow: var(--landbd-shadow);
+              overflow: hidden;
+            }
+            .esri-ui .esri-widget--button {
+              border-radius: 0;
+              transition: background-color .18s ease, transform .18s ease;
+            }
+            .esri-ui .esri-widget--button:hover {
+              background: rgba(11,107,80,.08);
+              transform: translateY(-1px);
+            }
+            .esri-zoom .esri-widget--button:first-child { border-radius: .75rem .75rem 0 0; }
+            .esri-zoom .esri-widget--button:last-child { border-radius: 0 0 .75rem .75rem; }
+            .esri-ui-top-left, .esri-ui-top-right { margin-top: .75rem; }
+            .esri-ui-bottom-left, .esri-ui-bottom-right { margin-bottom: .75rem; }
+            .esri-ui-corner { margin-left: .75rem; margin-right: .75rem; }
+
+            calcite-shell { --calcite-ui-brand: var(--landbd-primary); }
+            calcite-panel, calcite-block {
+              --calcite-ui-foreground-1: var(--landbd-surface);
+              --calcite-ui-border-1: var(--landbd-border);
+            }
+            calcite-panel { border-radius: .9rem; box-shadow: var(--landbd-shadow); }
+            calcite-block { border-radius: .65rem; }
+            calcite-button { --calcite-ui-brand: var(--landbd-primary); }
+
+            /* Native controls that may exist outside Calcite shadow DOM. */
+            select, input:not([type="checkbox"]):not([type="radio"]), textarea {
+              border-radius: .5rem;
+              border-color: var(--landbd-border);
+              box-shadow: none;
+              transition: border-color .15s ease, box-shadow .15s ease;
+            }
+            select:focus, input:focus, textarea:focus {
+              border-color: rgba(11,107,80,.55);
+              box-shadow: 0 0 0 .2rem rgba(11,107,80,.12);
+              outline: none;
+            }
+
+            /* Responsive map UI: keep controls usable on phones. */
+            @media (max-width: 768px) {
+              .esri-ui-top-left, .esri-ui-top-right { margin-top: .5rem; }
+              .esri-ui-corner { margin-left: .5rem; margin-right: .5rem; }
+              .esri-ui-bottom-left, .esri-ui-bottom-right { margin-bottom: .5rem; }
+              .esri-ui .esri-widget, .esri-ui .esri-component { border-radius: .6rem; }
+            }
+          </style>
+          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" defer></script>
+          '''
+              html = html.replace("</head>", theme + "\n</head>", 1)
+              path.write_text(html, encoding="utf-8")
+          else:
+              print("Bootstrap theme already present; no changes needed.")
+
+      - name: Commit themed HTML
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add rajuk_master_plan.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "feat: style RAJUK master plan with Bootstrap [skip ci]"
+          git push
