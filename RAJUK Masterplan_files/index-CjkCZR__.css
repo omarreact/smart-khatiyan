@@ -1,0 +1,41 @@
+/* Bootstrap 5.3 + RAJUK Masterplan theme bridge */
+@import url("https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css");
+@import url("https://masterplan.rajuk.gov.bd/assets/index-CjkCZR__.css");
+
+:root {
+  --landbd-green: #087f5b;
+  --landbd-green-dark: #056044;
+  --landbd-surface: rgba(255,255,255,.96);
+  --landbd-border: rgba(20,40,35,.14);
+  --landbd-shadow: 0 8px 28px rgba(16, 40, 32, .12);
+}
+
+html, body { font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+
+/* Bootstrap-inspired polish without breaking Calcite/ArcGIS custom elements. */
+calcite-shell, calcite-panel, calcite-block, calcite-flow, calcite-flow-item,
+calcite-action, calcite-button, calcite-input, calcite-select, calcite-combobox,
+calcite-card, calcite-list, calcite-notice {
+  --calcite-color-brand: var(--landbd-green);
+  --calcite-color-brand-hover: var(--landbd-green-dark);
+  --calcite-color-brand-press: #044b36;
+  --calcite-color-border-1: var(--landbd-border);
+  --calcite-ui-border-1: var(--landbd-border);
+  --calcite-ui-foreground-1: var(--landbd-surface);
+  --calcite-ui-foreground-2: #f8faf9;
+}
+
+calcite-panel, calcite-flow-item, calcite-block, calcite-card {
+  border-radius: .75rem;
+}
+
+.esri-widget, .esri-widget--button {
+  border-radius: .5rem;
+}
+
+.esri-widget--button:hover { transform: translateY(-1px); transition: transform .15s ease; }
+
+@media (max-width: 768px) {
+  calcite-panel { max-width: 92vw; }
+  .esri-ui-top-left, .esri-ui-top-right { margin: .5rem; }
+}

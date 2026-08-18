@@ -1,0 +1,5 @@
+/* RAJUK Masterplan compatibility loader
+ * The saved HTML expects this local module. The original application bundle
+ * is hosted by RAJUK, so load it from its canonical HTTPS asset URL.
+ */
+import "https://masterplan.rajuk.gov.bd/assets/index-s_M569IQ.js";
